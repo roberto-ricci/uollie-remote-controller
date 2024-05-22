@@ -31,7 +31,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Web App
-        run: flutter build web --base-href=/uollie/
+        run: flutter build web --base-href=/uollie-remote-controller/
 
       - name: Deploy to GitHub Pages 🚀
         uses: JamesIves/github-pages-deploy-action@v4
