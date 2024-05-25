@@ -24,10 +24,9 @@ class _ControllerViewState extends State<ControllerView> {
     super.didChangeDependencies();
     // Find the characteristic and store if for future usage
     var services = await widget.device.discoverServices();
-    remoteControllerChar = await services.firstWhere((element) => element.uuid == "myservice").getCharacteristic("");
+    remoteControllerChar = await services.firstWhere((element) => element.uuid == "00001523-1212-efde-1523-785feabcd123").getCharacteristic("00001524-1212-efde-1523-785feabcd123");
         timer = Timer.periodic(const Duration(milliseconds: 100), (timer) async {
-      print("x=$x, y=$y");
-      await remoteControllerChar.writeValueWithoutResponse(Uint8List.fromList([x,y]));
+      remoteControllerChar.writeValueWithoutResponse(Uint8List.fromList([x,y]));
     });
   }
 

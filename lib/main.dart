@@ -33,8 +33,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   BluetoothDevice? device;
 
-  void onDeviceSelected(BluetoothDevice device) {
-    device.connect();
+  void onDeviceSelected(BluetoothDevice device) async {
+    await device.connect();
     device.connected.listen((connected) {
       if(!connected) {
         setState(() {
