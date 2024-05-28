@@ -1,11 +1,11 @@
 {
-    "name": "uollie_remote_controller",
-    "short_name": "uollie_remote_controller",
+    "name": "Uollie Remote Controller",
+    "short_name": "Uollie Remote Controller",
     "start_url": ".",
-    "display": "fullscreen",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "display": "standalone",
+    "background_color": "#F8BBD0",
+    "theme_color": "#F8BBD0",
+    "description": "A basic app to control Uollie.",
     "orientation": "landscape",
     "prefer_related_applications": false,
     "icons": [
