@@ -67,6 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: Image.asset("assets/images/Icon-512.png"),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text("Uollie"),
         actions: isConnected ? [IconButton(onPressed: () {
