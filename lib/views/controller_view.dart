@@ -6,6 +6,25 @@ import 'package:flutter_joystick/flutter_joystick.dart';
 import 'package:flutter_web_bluetooth/flutter_web_bluetooth.dart';
 import 'package:uollie_remote_controller/ble_def.dart';
 
+class MyJoystickStick extends StatelessWidget {
+  final double size;
+  final Color color;
+
+  const MyJoystickStick(this.size, this.color, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color,
+      ),
+    );
+  }
+}
+
 class ControllerView extends StatefulWidget {
   static const Duration transmissionInterval = Duration(milliseconds: 100);
   final BluetoothDevice device;
@@ -16,6 +35,7 @@ class ControllerView extends StatefulWidget {
 }
 
 class _ControllerViewState extends State<ControllerView> {
+  static Widget joystickStick = MyJoystickStick(50.0, Colors.teal.shade300);
   late Timer timer;
   late BluetoothCharacteristic remoteControllerChar;
   int x = 0, y = 0;
@@ -54,6 +74,7 @@ class _ControllerViewState extends State<ControllerView> {
                   x = (-details.y * 100).round();
                 });
               },
+              stick: joystickStick,
             ),
           ),
           Align(
@@ -65,6 +86,7 @@ class _ControllerViewState extends State<ControllerView> {
                   y = (-details.x * 100).round();
                 });
               },
+              stick: joystickStick,
             ),
           ),
         ],
