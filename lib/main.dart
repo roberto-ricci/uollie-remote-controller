@@ -42,17 +42,18 @@ class _MyHomePageState extends State<MyHomePage> {
     });
     try {
       await device.connect();
+      
       device.connected.listen((connected) {
-        if(!connected) {
+        if (!connected) {
           setState(() {
             this.device = null;
           });
         }
       });
-    setState(() {
-      this.device = device;
-    });
-    } catch(e) {
+      setState(() {
+        this.device = device;
+      });
+    } catch (e) {
       logger.severe(e);
     } finally {
       setState(() {
@@ -61,23 +62,35 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  bool get isConnected => device != null; 
+  bool get isConnected => device != null;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: Image.asset("assets/images/Icon-512.png"),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text("Uollie"),
-        actions: isConnected ? [IconButton(onPressed: () {
-          device!.disconnect();
-          setState(() {
-            device = null;
-          });
-        }, icon: const Icon(Icons.link_off))]: [],
-      ),
-      body: isConnected ? ControllerView(device!) : (isLoading ? const Center(child: CircularProgressIndicator(strokeWidth: 6.0,)) : ConnectView(onDeviceSelected))
-    );
+        appBar: AppBar(
+          leading: Image.asset("assets/images/Icon-512.png"),
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: const Text("Uollie"),
+          actions: isConnected
+              ? [
+                  IconButton(
+                      onPressed: () {
+                        device!.disconnect();
+                        setState(() {
+                          device = null;
+                        });
+                      },
+                      icon: const Icon(Icons.link_off))
+                ]
+              : [],
+        ),
+        body: isConnected
+            ? ControllerView(device!)
+            : (isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(
+                    strokeWidth: 6.0,
+                  ))
+                : ConnectView(onDeviceSelected)));
   }
 }
