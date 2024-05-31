@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_web_bluetooth/flutter_web_bluetooth.dart';
 import 'package:flutter_web_bluetooth/js_web_bluetooth.dart';
 import 'package:logging/logging.dart';
-import '../ble_def.dart';
+import '../robot.dart';
 
 class ConnectView extends StatelessWidget {
   static final logger = Logger('ConnectView');
@@ -12,9 +12,9 @@ class ConnectView extends StatelessWidget {
 
   Future<void> requestDevice() async {
     final requestOptions = RequestOptionsBuilder([
-      RequestFilterBuilder(name: deviceName, services: [
+      RequestFilterBuilder(name: Robot.deviceName, services: [
         BluetoothDefaultServiceUUIDS.battery.uuid,
-        remoteControlServiceUUID
+        Robot.remoteControlServiceUUID
       ])
     ]);
 

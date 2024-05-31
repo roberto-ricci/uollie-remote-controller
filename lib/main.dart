@@ -1,8 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_web_bluetooth/flutter_web_bluetooth.dart';
 import './views/connect_view.dart';
 import './views/controller_view.dart';
 import 'package:logging/logging.dart';
+import './robot.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,26 +35,47 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  BluetoothDevice? device;
+  Robot? robot;
   bool isLoading = false;
   static final logger = Logger('Home');
+  int batteryLevel = 100;
+
+  static Icon getBatteryIcon(int level) {
+    List<IconData> iconDataList = [
+      Icons.battery_0_bar,
+      Icons.battery_1_bar,
+      Icons.battery_2_bar,
+      Icons.battery_3_bar,
+      Icons.battery_4_bar,
+      Icons.battery_5_bar,
+      Icons.battery_6_bar,
+      Icons.battery_full
+    ];
+    int index = ((level / (100.0 / (iconDataList.length - 1))) + 0.5).floor();
+    return Icon(iconDataList[index]);
+  }
+
+  void onBatteryLevelUpdate(int level) {
+    setState(() {
+      batteryLevel = level;
+    });
+  }
 
   void onDeviceSelected(BluetoothDevice device) async {
     setState(() {
       isLoading = true;
     });
     try {
-      await device.connect();
-      
+      robot = await Robot.connect(device);
       device.connected.listen((connected) {
         if (!connected) {
           setState(() {
-            this.device = null;
+            robot = null;
           });
         }
       });
       setState(() {
-        this.device = device;
+        // Force a refresh
       });
     } catch (e) {
       logger.severe(e);
@@ -62,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  bool get isConnected => device != null;
+  bool get isConnected => robot != null;
 
   @override
   Widget build(BuildContext context) {
@@ -73,11 +97,13 @@ class _MyHomePageState extends State<MyHomePage> {
           title: const Text("Uollie"),
           actions: isConnected
               ? [
+                  Text("$batteryLevel%"),
+                  getBatteryIcon(batteryLevel),
                   IconButton(
                       onPressed: () {
-                        device!.disconnect();
+                        robot!.device.disconnect();
                         setState(() {
-                          device = null;
+                          robot = null;
                         });
                       },
                       icon: const Icon(Icons.link_off))
@@ -85,7 +111,7 @@ class _MyHomePageState extends State<MyHomePage> {
               : [],
         ),
         body: isConnected
-            ? ControllerView(device!)
+            ? ControllerView(robot!, onBatteryLevelUpdate: onBatteryLevelUpdate)
             : (isLoading
                 ? const Center(
                     child: CircularProgressIndicator(

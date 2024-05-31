@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_joystick/flutter_joystick.dart';
 import 'package:flutter_web_bluetooth/flutter_web_bluetooth.dart';
-import 'package:uollie_remote_controller/ble_def.dart';
+import '../robot.dart';
 
 class MyJoystickStick extends StatelessWidget {
   final double size;
@@ -26,9 +25,12 @@ class MyJoystickStick extends StatelessWidget {
 }
 
 class ControllerView extends StatefulWidget {
-  static const Duration transmissionInterval = Duration(milliseconds: 100);
-  final BluetoothDevice device;
-  const ControllerView(this.device, {super.key});
+  static const Duration motorControlUpdateInterval =
+      Duration(milliseconds: 100);
+  static const Duration batteryLevelUpdateInterval = Duration(seconds: 5);
+  final Robot robot;
+  final void Function(int)? onBatteryLevelUpdate;
+  const ControllerView(this.robot, {this.onBatteryLevelUpdate, super.key});
 
   @override
   State<ControllerView> createState() => _ControllerViewState();
@@ -36,27 +38,37 @@ class ControllerView extends StatefulWidget {
 
 class _ControllerViewState extends State<ControllerView> {
   static Widget joystickStick = MyJoystickStick(50.0, Colors.teal.shade300);
-  late Timer timer;
+  late Timer motorControlUpdateTimer, batteryLevelUpdateTimer;
   late BluetoothCharacteristic remoteControllerChar;
   int x = 0, y = 0;
+
+  Future<void> readBatteryLevel() async {
+    var batteryLevel = await widget.robot.readBatteryLevel();
+    if (widget.onBatteryLevelUpdate != null) {
+      widget.onBatteryLevelUpdate!(batteryLevel);
+    }
+  }
 
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
-    // Find the characteristic and store if for future usage
-    var services = await widget.device.discoverServices();
-    remoteControllerChar = await services
-        .firstWhere((element) => element.uuid == remoteControlServiceUUID)
-        .getCharacteristic(remoteControlCharacteristicUUID);
-    timer = Timer.periodic(ControllerView.transmissionInterval, (timer) async {
-      remoteControllerChar
-          .writeValueWithoutResponse(Uint8List.fromList([x, y]));
+    // Read battery
+    readBatteryLevel();
+    // Start timers
+    motorControlUpdateTimer = Timer.periodic(
+        ControllerView.motorControlUpdateInterval, (timer) async {
+      widget.robot.sendXY(x, y);
+    });
+    batteryLevelUpdateTimer = Timer.periodic(
+        ControllerView.batteryLevelUpdateInterval, (timer) async {
+      readBatteryLevel();
     });
   }
 
   @override
   void dispose() {
-    timer.cancel();
+    motorControlUpdateTimer.cancel();
+    batteryLevelUpdateTimer.cancel();
     super.dispose();
   }
 
