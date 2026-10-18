@@ -8,6 +8,8 @@ class Robot {
   static const String remoteControlCharacteristicUUID =
       "00001524-1212-efde-1523-785feabcd123";
   static const String deviceName = "Uollie";
+  static const String trimCharacteristicUUID =
+      "00001525-1212-efde-1523-785feabcd123";
 
   final BluetoothDevice device;
   final BluetoothCharacteristic remoteControlCharacteristic;
@@ -39,5 +41,29 @@ class Robot {
   Future<int> readBatteryLevel() async {
     var data = await batteryLevelCharacteristic.readValue();
     return data.getUint8(0);
+  }
+
+  Future<BluetoothCharacteristic> _trimCharacteristic() async {
+    final services = await device.discoverServices();
+    return services
+        .firstWhere((service) => service.uuid == remoteControlServiceUUID)
+        .getCharacteristic(trimCharacteristicUUID);
+  }
+
+  Future<List<int>> readTrim() async {
+    final characteristic = await _trimCharacteristic();
+    final data = await characteristic.readValue();
+    if (data.lengthInBytes != 2 ||
+        data.getUint8(0) > 100 || data.getUint8(1) > 100) {
+      throw const FormatException('Invalid motor trim values');
+    }
+    return [data.getUint8(0), data.getUint8(1)];
+  }
+
+  Future<void> writeTrim(int left, int right) async {
+    RangeError.checkValueInInterval(left, 0, 100, 'left');
+    RangeError.checkValueInInterval(right, 0, 100, 'right');
+    final characteristic = await _trimCharacteristic();
+    await characteristic.writeValueWithResponse(Uint8List.fromList([left, right]));
   }
 }

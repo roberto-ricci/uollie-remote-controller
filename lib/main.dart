@@ -1,11 +1,10 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_web_bluetooth/flutter_web_bluetooth.dart';
 import './views/connect_view.dart';
 import './views/controller_view.dart';
 import 'package:logging/logging.dart';
 import './robot.dart';
+import './views/settings_dialog.dart';
 
 void main() {
   runApp(const MyApp());
@@ -109,7 +108,22 @@ class _MyHomePageState extends State<MyHomePage> {
                           robot = null;
                         });
                       },
-                      icon: const Icon(Icons.link_off))
+                      icon: const Icon(Icons.link_off)),
+                  IconButton(
+                    tooltip: 'Settings',
+                    icon: const Icon(Icons.settings),
+                    onPressed: () {
+                      final connectedRobot = robot!;
+                      showDialog<void>(
+                        context: context,
+                        builder: (_) => SettingsDialog(
+                          readTrim: connectedRobot.readTrim,
+                          writeTrim: connectedRobot.writeTrim,
+                          connected: connectedRobot.device.connected,
+                        ),
+                      );
+                    },
+                  ),
                 ]
               : [],
         ),
